@@ -4,7 +4,7 @@
 @gmail mitchell.wright877@gmail.com
 '''
 
-import pygame
+import pygame, random 
 
 win = pygame.display.set_mode((800,800))
 pygame.display.set_caption("Game Of Life")
@@ -89,12 +89,22 @@ while(run):
             redrawCell(x, y)
             
         if event.type == pygame.KEYDOWN:
-            # TODO Add key presses
             
             if event.key == pygame.K_SPACE:
                 # Space bar is pressed, toggle active state
                 active = not active
                 print("Simulation State is now:",active)
+                
+            if event.key == pygame.K_r:
+                # R key will fill the space with a random assortment of cells
+                print("Randomizing screen")
+                for y in range(80):
+                    for x in range(80):
+                        if random.randint(0,3) == 2:
+                            CellMatrix[y][x] = True
+                        else:
+                            CellMatrix[y][x] = False
+                        redrawCell(x, y)
                 
     if active == True:
         # If the simulation is active then it should be simulated
