@@ -58,7 +58,7 @@ class Ant():
         self.x+=self.direction.geti()
         self.y+=self.direction.getj()
         
-        if self.x == -1:
+        if self.x == -1: # If the ant moves out of bounds set it to oppposite edge
             self.x = 79
         elif self.x == 80:
             self.x = 0
@@ -75,6 +75,7 @@ win = pygame.display.set_mode((800,800))
 pygame.display.set_caption("Langton's Ant")
 
 def drawAnt(ant:Ant):
+    # Draw the ant on the screen
     x,y=ant.getX(),ant.getY()
     
     pygame.draw.rect(win, (255,0,0), ((x*10)+3,(y*10)+3, 4,4))
@@ -142,5 +143,6 @@ while(run):
             redrawCell(x, y)
             
         for ant in Ants:
-            drawAnt(ant)
+            drawAnt(ant) # Call for each ant too be redrawn
+            # Previous frame ants don't matter as the cell updates overlap them
 
