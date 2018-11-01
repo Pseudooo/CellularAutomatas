@@ -100,7 +100,7 @@ while(run):
                 print("Randomizing screen")
                 for y in range(80):
                     for x in range(80):
-                        if random.randint(0,3) == 2:
+                        if random.randint(0,3) == 2: # one in 3 chance of being alive
                             CellMatrix[y][x] = True
                         else:
                             CellMatrix[y][x] = False
