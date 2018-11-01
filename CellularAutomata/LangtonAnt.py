@@ -82,6 +82,7 @@ Ants = []
 run = True
 while(run):
     # Update display for next simulation tick
+    pygame.time.delay(100)
     pygame.display.update()
     
     # Event handler
@@ -99,7 +100,7 @@ while(run):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 active = not active
-                print('Active set to: %d' % active)
+                print('Active set to: '+str(active))
     
     if active == True:
         # Simulation is active
@@ -109,15 +110,17 @@ while(run):
             ant = Ants[i]
             x,y = ant.getX(),ant.getY()
             
+            # Follow the rules of the cellular automata
             if CellMatrix[y][x] == True:
                 ant.getDirection().rotateCW()
             else:
                 ant.getDirection().rotateCCW()
             ant.moveForward()
             
+            # Append to the queue of cells to be updated
             cellQueue.append([x,y])
         
-        for x,y in cellQueue:
+        for x,y in cellQueue: # Toggle all cells in the cell queue
             CellMatrix[y][x] = not CellMatrix[y][x]
             redrawCell(x, y)
 
