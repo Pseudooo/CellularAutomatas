@@ -105,6 +105,12 @@ while(run):
                         else:
                             CellMatrix[y][x] = False
                         redrawCell(x, y)
+                        
+            if event.key == pygame.K_c:
+                # C key will clear the board
+                
+                CellMatrix = [[False for a in range(80)] for b in range(80)]
+                win.fill((0,0,0))
                 
     if active == True:
         # If the simulation is active then it should be simulated
