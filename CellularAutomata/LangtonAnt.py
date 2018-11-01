@@ -58,11 +58,27 @@ class Ant():
         self.x+=self.direction.geti()
         self.y+=self.direction.getj()
         
+        if self.x == -1:
+            self.x = 79
+        elif self.x == 80:
+            self.x = 0
+            
+        if self.y == -1:
+            self.y = 79
+        elif self.y == 80:
+            self.y = 0
+        
 # Create the cell matrix
 CellMatrix = [[False for a in range(80)] for b in range(80)]
 
 win = pygame.display.set_mode((800,800))
 pygame.display.set_caption("Langton's Ant")
+
+def drawAnt(ant:Ant):
+    x,y=ant.getX(),ant.getY()
+    
+    pygame.draw.rect(win, (255,0,0), ((x*10)+3,(y*10)+3, 4,4))
+    
 
 def redrawCell(x:int, y:int):
     col = None
@@ -82,7 +98,7 @@ Ants = []
 run = True
 while(run):
     # Update display for next simulation tick
-    pygame.time.delay(100)
+    #pygame.time.delay(100)
     pygame.display.update()
     
     # Event handler
@@ -96,6 +112,7 @@ while(run):
             
             NewAnt = Ant(Vector(0, 1), x, y)
             Ants.append(NewAnt)
+            drawAnt(NewAnt)
         
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -123,4 +140,7 @@ while(run):
         for x,y in cellQueue: # Toggle all cells in the cell queue
             CellMatrix[y][x] = not CellMatrix[y][x]
             redrawCell(x, y)
+            
+        for ant in Ants:
+            drawAnt(ant)
 
