@@ -20,8 +20,8 @@ pygame.display.set_caption("Predator and Prey")
 Setup some helper function
 '''
 
-PreyCells = []
-PredatorCells = []
+PreyCells = set([])
+PredatorCells = set([])
 
 def getNeighbours(x:int, y:int, CellType:int):
     
@@ -67,7 +67,7 @@ simulating = False
 run = True
 while(run):
     pygame.display.update()
-    pygame.time.delay(100)
+    #pygame.time.delay(100)
     
     for event in pygame.event.get():
         
@@ -81,23 +81,26 @@ while(run):
             x,y = int(x//10),int(y//10)
             if CellMatrix[y][x] == 0:
                 # Cell is becoming a prey cell
-                PreyCells.append([x,y])
+                PreyCells.add((x,y))
             elif CellMatrix[y][x] == 1:
                 # Cell is becoming predator
-                PreyCells.remove([x,y])
-                PredatorCells.append([x,y])
+                PreyCells.remove((x,y))
+                PredatorCells.add((x,y))
             else:
                 # Cell is becoming empty
-                PredatorCells.remove([x,y])
+                PredatorCells.remove((x,y))
             
             # Increase value of cell
             CellMatrix[y][x]+=1
-            if CellMatrix[y][x] == 4:
+            if CellMatrix[y][x] == 3:
                 # Reset to 0 at end of possible values
                 CellMatrix[y][x] = 0
                 
             # Call for cell to be redrawn with new state
             redrawCell(x, y)
+            
+            print("Prey Cells:",PreyCells)
+            print("Predator Cells:",PredatorCells)
         
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -107,13 +110,13 @@ while(run):
     if simulating == True:
         # Simulation is active
         
-        actionQueue = []
+        actionQueue = set([])
         
         for PreyX,PreyY in PreyCells:
             
             # 30% chance of prey cell randomly dying
             if r.randint(0,10) > 3:
-                actionQueue.append([PreyX,PreyY,0])
+                actionQueue.add((PreyX,PreyY,0))
                 continue
             
             # Get all empty cell neighbours
@@ -121,18 +124,18 @@ while(run):
             
             # Loop through each empty neighbour
             for neighbourX,neighbourY in neighbours:
-                action = [neighbourX,neighbourY,1]
+                action = (neighbourX,neighbourY,1)
                 
                 # If action isn't already queued, queue it
-                if not actionQueue.__contains__(action):
-                    actionQueue.append(action)
+                if not action in actionQueue:
+                    actionQueue.add(action)
                     #print("Appended")
     
         for PredX,PredY in PredatorCells:
             
             # 10% chance of predator randomly dying
             if r.randint(0,10) == 3:
-                actionQueue.append([PredX,PredY,0])
+                actionQueue.add((PredX,PredY,0))
             
             # Get all prey neighbours
             neighbours = getNeighbours(PredX, PredY, 1)
@@ -141,16 +144,16 @@ while(run):
             eaten = False
             
             for neighbourX,neighbourY in neighbours:
-                action = [neighbourX,neighbourY,2]
+                action = (neighbourX,neighbourY,2)
                 
-                if not actionQueue.__contains__(action):
+                if not action in actionQueue:
                     # Predator has now eaten and queue the action
-                    actionQueue.append(action)
+                    actionQueue.add(action)
                     eaten = True
             
             if eaten == False:
                 # Kill the predator if it hasn't eaten
-                actionQueue.append([PredX,PredY,0])
+                actionQueue.add((PredX,PredY,0))
         
         for x,y,val in actionQueue:
             
@@ -158,17 +161,16 @@ while(run):
             
             # Unlist any prior predator/prey cels
             if CellMatrix[y][x] == 1:
-                PreyCells.remove([x,y])
+                PreyCells.remove((x,y))
             elif CellMatrix[y][x] == 2:
-                PredatorCells.remove([x,y])
+                PredatorCells.remove((x,y))
                 
             # List any new predator/prey cells
             if val == 1:
-                PreyCells.append([x,y])
+                PreyCells.add((x,y))
             elif val == 2:
-                PredatorCells.append([x,y])
+                PredatorCells.add((x,y))
             
-            # Update the cell
             CellMatrix[y][x] = val
             redrawCell(x, y)
               
