@@ -1,72 +1,40 @@
 import pygame
+import random as rand
+from GameOfLife import redrawCell
 
-# Create a vector object to allow for directions to be handelled easier
-class Vector():
-    # Initialize the vector with i and j components
-    def __init__(self, i:int, j:int): 
-        self.i = i
-        self.j = j
-        
-    def geti(self): # Get the i component
-        return self.i
-    
-    def seti(self, i:int): # Set the i component
-        self.i = i
-        
-    def getj(self): # Get the j component
-        return self.j
-    
-    def setj(self, j:int): # Set the j component
-        self.j = j
-        
-    def rotateCW(self): # Rotate the vector 90d clockwise
-        self.i,self.j = self.j,-self.i
-        
-    def rotateCCW(self): # Rotate the vector 90d AntiClockwise
-        self.i,self.j = -self.j,self.i
-        
-    def __str__(self): # Return a pretty string
-        return "("+str(self.i)+"i + "+str(self.j)+"j)"
-    
-# Here we define an ant object to better handle the ant(s) on the screen
+# Define ant class to make handling numerous ants easier
 class Ant():
     # Initialize the ant with a direction and position
-    def __init__(self, Direction:Vector, x:int, y:int):
-        self.direction = Direction
-        self.x = x
-        self.y = y
-        
+    def __init__(self,x,y,xVel,yVel):
+        self.pos = (x,y)
+        self.vel = (xVel,yVel)
+    
     def getDirection(self): # Get the direction of the ant
-        return self.direction
+        return self.vel
     
-    def setDirection(self, Direction:Vector):
-        self.direction = Direction
+    def setDirection(self, xVel,yVel):
+        self.vel = (xVel,yVel)
         
-    def getX(self):
-        return self.x
+    def getPosition(self):
+        return self.pos
     
-    def getY(self):
-        return self.y
-    
-    def setX(self, x:int):
-        self.x = x
-        
-    def setY(self, y:int):
-        self.y = y
+    def setPosition(self,x,y):
+        self.pos = (x,y)
         
     def moveForward(self):
-        self.x+=self.direction.geti()
-        self.y+=self.direction.getj()
+        x,y = self.pos
+        xVel,yVel=self.vel
         
-        if self.x == -1: # If the ant moves out of bounds set it to oppposite edge
-            self.x = 79
-        elif self.x == 80:
-            self.x = 0
+        # Move by current vel
+        x+=xVel
+        y+=yVel
+        
+        # make edges of screen wrap around
+        x%=80
+        y%=80
             
-        if self.y == -1:
-            self.y = 79
-        elif self.y == 80:
-            self.y = 0
+        # Update ant pos
+        self.pos = (x,y)
         
 # Create the cell matrix
 CellMatrix = [[False for a in range(80)] for b in range(80)]
@@ -76,23 +44,22 @@ pygame.display.set_caption("Langton's Ant")
 
 def drawAnt(ant:Ant):
     # Draw the ant on the screen
-    x,y=ant.getX(),ant.getY()
-    
+    x,y=ant.getPosition()
     pygame.draw.rect(win, (255,0,0), ((x*10)+3,(y*10)+3, 4,4))
     
-
 def redrawCell(x:int, y:int):
-    col = None
-    if CellMatrix[y][x] == True:
+    # Default state of the cell is black
+    col = (0,0,0)
+    if CellMatrix[y][x] == True: # If true cell is white
         col = (255,255,255)
-    else:
-        col = (0,0,0)
     
+    # Draw cell
     pygame.draw.rect(win, col, (x*10,y*10,10,10))
 
 # The state of activity for the simulation
 active = False
 
+# Keep track of all ants that are on the screen
 Ants = []
 
 # Main game loop
@@ -111,7 +78,7 @@ while(run):
             x,y = pygame.mouse.get_pos()
             x,y=int(x//10),int(y//10)
             
-            NewAnt = Ant(Vector(0, 1), x, y)
+            NewAnt = Ant(x,y,0,1)
             Ants.append(NewAnt)
             drawAnt(NewAnt)
         
@@ -119,29 +86,47 @@ while(run):
             if event.key == pygame.K_SPACE:
                 active = not active
                 print('Active set to: '+str(active))
+                
+            elif event.key == pygame.K_r:
+                print("Random filling board space")
+                CellMatrix = [[(rand.randint(0,2)==1 and True or False) for x in range(80)] for y in range(80)]
+                [[redrawCell(x, y) for x in range(80)] for y in range(80)]
+                
+            elif event.key == pygame.K_c:
+                print("Clearing board space")
+                CellMatrix = [[False for x in range(80)] for y in range(80)]
+                Ants.clear()
+                win.fill((0,0,0))
     
     if active == True:
         # Simulation is active
+        
+        # Queue all cells to be inverted and redrawn after frame
         cellQueue = []
-        
-        for i in range(len(Ants)):
-            ant = Ants[i]
-            x,y = ant.getX(),ant.getY()
             
-            # Follow the rules of the cellular automata
+        for ant in Ants:
+            # Loop through each ant on the screen
+            x,y = ant.getPosition()
+            xVel,yVel = ant.getDirection()
+            
+            # If white cell turn left if black turn right
             if CellMatrix[y][x] == True:
-                ant.getDirection().rotateCW()
+                xVel,yVel = yVel,-xVel
             else:
-                ant.getDirection().rotateCCW()
+                xVel,yVel= -yVel,xVel
+                
+            # Update velocity and moveforwad
+            ant.setDirection(xVel,yVel)
             ant.moveForward()
-            
-            # Append to the queue of cells to be updated
+            # Queue cell update
             cellQueue.append([x,y])
-        
-        for x,y in cellQueue: # Toggle all cells in the cell queue
+            
+        # Register all cell updates
+        for x,y in cellQueue:
             CellMatrix[y][x] = not CellMatrix[y][x]
             redrawCell(x, y)
             
+        # Redraw all ants in the new frame
         for ant in Ants:
             drawAnt(ant) # Call for each ant too be redrawn
             # Previous frame ants don't matter as the cell updates overlap them

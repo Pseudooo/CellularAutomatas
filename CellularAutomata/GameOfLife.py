@@ -30,12 +30,12 @@ def redrawCell(x:int,y:int):
 
 # Helper function to count the (living) neighbours of a given coordinate
 def countNeighbours(x:int,y:int):
-    count = 0
     
+    count = 0
     for xShift in [-1,0,1]:
         for yShift in [-1,0,1]:
             
-            # Skip check onself
+            # Skip check on self
             if xShift == 0 and yShift == 0:
                 continue
             
@@ -46,7 +46,7 @@ def countNeighbours(x:int,y:int):
             if CheckX == -1 or CheckX == 80 or CheckY == -1 or CheckY == 80:
                 continue
             
-            # Increase neighbour count if lving cell found
+            # Increase neighbour count if living cell found
             if CellMatrix[CheckY][CheckX]:
                 count+=1
                 
