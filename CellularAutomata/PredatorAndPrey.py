@@ -9,7 +9,6 @@ containing integer values
 2 = Predator
 '''
 
-
 # Populate CellMatrix with empty cells for init
 CellMatrix = [[0 for a in range(80)] for b in range(80)]
 
@@ -67,7 +66,10 @@ simulating = False
 run = True
 while(run):
     pygame.display.update()
-    #pygame.time.delay(100)
+    pygame.time.delay(100)
+    
+    print("Predators:",len(PredatorCells))
+    print("Prey:",len(PreyCells))
     
     for event in pygame.event.get():
         
