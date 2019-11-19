@@ -1,6 +1,5 @@
 import pygame
 import random as rand
-from GameOfLife import redrawCell
 
 # Define ant class to make handling numerous ants easier
 class Ant():
